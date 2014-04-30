@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -8,11 +9,11 @@ char * int_to_couleur(int coul)
     return list[coul];
 }
 
-int couleur_to_int (char * c)
+int couleur_to_int (const char * c)
 {
     char * list [23] = {"Cyan","Magenta","Emeraude","Jaune","Bleu","Rouge","Vert","Saphir","Kaki","Brun","Marron","Rose","Violet","Mauve","Pourpre","Bleu roi","Ocre","Noir","Blanc","Gris","Beige","Creme","Fluo"};
     for (int i = 0 ; i<22 ; i++)
-        if (c == list[i])
+        if (strcmp (c, list[i]) == 0)
             return i;
 }
 
@@ -44,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->critere_combo_box_vente,SIGNAL(currentIndexChanged(int)),this,SLOT(changement_affichage_vente()),Qt::AutoConnection);
     QObject::connect(ui->tableWidget_vente,SIGNAL(itemSelectionChanged()),this,SLOT(enablement_detail_vente()),Qt::AutoConnection);
     QObject::connect(ui->boutton_detail_vente,SIGNAL(clicked()),this,SLOT(ouvre_detail()),Qt::AutoConnection);
+    QObject::connect(ui->doubleSpinBox_vente,SIGNAL(valueChanged(double)),this,SLOT(changement_affichage_vente()),Qt::AutoConnection);
+    QObject::connect(ui->doubleSpinBox_prix_max_vente,SIGNAL(valueChanged(double)),this,SLOT(changement_affichage_vente()),Qt::AutoConnection);
 }
 
 MainWindow::~MainWindow()
@@ -545,36 +548,36 @@ void MainWindow::changement_affichage_gestion()
 
 void MainWindow::changement_affichage_vente()
 {
-    if(ui->critere_combo_box_gestion->currentIndex() != 0)
+    if(ui->critere_combo_box_vente->currentIndex() > 0)
     {
-        ui->doubleSpinBox_gestion->setEnabled(true);
+        ui->doubleSpinBox_vente->setEnabled(true);
 
-        switch(ui->critere_combo_box_gestion->currentIndex())
+        switch(ui->critere_combo_box_vente->currentIndex())
         {
-            case 1 : ui->doubleSpinBox_gestion->setMinimum(0); // identifiant
-                    ui->doubleSpinBox_gestion->setMaximum(m.nombre_ventes()-1);
-                    ui->doubleSpinBox_gestion->setDecimals(0);
-                    ui->doubleSpinBox_gestion->setSingleStep(1.);
-                    ui->doubleSpinBox_gestion->setSuffix(tr(""));
-                    ui->doubleSpinBox_prix_max->setEnabled(false);
+            case 1 : ui->doubleSpinBox_vente->setMinimum(0); // identifiant
+                    ui->doubleSpinBox_vente->setMaximum(m.nombre_ventes()-1);
+                    ui->doubleSpinBox_vente->setDecimals(0);
+                    ui->doubleSpinBox_vente->setSingleStep(1.);
+                    ui->doubleSpinBox_vente->setSuffix(tr(""));
+                    ui->doubleSpinBox_prix_max_vente->setEnabled(false);
                     break;
 
-            case 2 : ui->doubleSpinBox_gestion->setMinimum(0); // quantite articles
-                    ui->doubleSpinBox_gestion->setMaximum(9999);
-                    ui->doubleSpinBox_gestion->setDecimals(0);
-                    ui->doubleSpinBox_gestion->setSingleStep(1.);
-                    ui->doubleSpinBox_gestion->setSuffix(tr(""));
-                    ui->doubleSpinBox_prix_max->setEnabled(false);
+            case 2 : ui->doubleSpinBox_vente->setMinimum(0); // quantite articles
+                    ui->doubleSpinBox_vente->setMaximum(9999);
+                    ui->doubleSpinBox_vente->setDecimals(0);
+                    ui->doubleSpinBox_vente->setSingleStep(1.);
+                    ui->doubleSpinBox_vente->setSuffix(tr(""));
+                    ui->doubleSpinBox_prix_max_vente->setEnabled(false);
                     break;
 
-            case 3 : ui->doubleSpinBox_gestion->setMinimum(0.99); // prix total
-                    ui->doubleSpinBox_gestion->setMaximum(99999999.99);
-                    ui->doubleSpinBox_gestion->setDecimals(2);
-                    ui->doubleSpinBox_gestion->setSingleStep(0.01);
-                    ui->doubleSpinBox_gestion->setSuffix(tr(" euros"));
-                    ui->doubleSpinBox_prix_max->setEnabled(true);
-                    if(ui->doubleSpinBox_gestion->value()>=ui->doubleSpinBox_prix_max->value()) // si le prix max est en dessous -> automatiquement 0.01 au dessus
-                        ui->doubleSpinBox_prix_max->setValue(ui->doubleSpinBox_gestion->value()+0.01);
+            case 3 : ui->doubleSpinBox_vente->setMinimum(0.99); // prix total
+                    ui->doubleSpinBox_vente->setMaximum(99999999.99);
+                    ui->doubleSpinBox_vente->setDecimals(2);
+                    ui->doubleSpinBox_vente->setSingleStep(0.01);
+                    ui->doubleSpinBox_vente->setSuffix(tr(" euros"));
+                    ui->doubleSpinBox_prix_max_vente->setEnabled(true);
+                    if(ui->doubleSpinBox_vente->value()>=ui->doubleSpinBox_prix_max_vente->value()) // si le prix max est en dessous -> automatiquement 0.01 au dessus
+                        ui->doubleSpinBox_prix_max_vente->setValue(ui->doubleSpinBox_vente->value()+0.01);
                     break;
         }
     }
@@ -591,7 +594,7 @@ void MainWindow::affichage_vente()
 {
     if (m.nombre_ventes()>0)
     {
-        if (ui->critere_combo_box_vente->currentIndex() == 0 || ui->critere_combo_box_vente->currentIndex() == 2 || ui->critere_combo_box_vente->currentIndex() == 3) // temporaire pour quantite/prix
+        if (ui->critere_combo_box_vente->currentIndex() == 0)
         {
             int nombre_vente = m.nombre_ventes();
             ui->tableWidget_vente->setRowCount(nombre_vente);
@@ -628,6 +631,7 @@ void MainWindow::affichage_vente()
         else if (ui->critere_combo_box_vente->currentIndex() == 1) // recherche par identifiant (en gros date)
         {
             int selec = (int)ui->doubleSpinBox_vente->value();
+            ui->tableWidget_vente->setRowCount(1);
 
             QTableWidgetItem * tab[4];
 
@@ -635,6 +639,12 @@ void MainWindow::affichage_vente()
             char dat[11];
             char qte[5];
             char pr_t[8];
+
+            for (int j = 0 ; j<4 ; j++)
+            {
+                tab[j] = new QTableWidgetItem;
+                ui->tableWidget_vente->setItem(j,0,tab[j]);
+            }
 
             std::vector<vente> vv = m.ventes();
 
@@ -649,6 +659,85 @@ void MainWindow::affichage_vente()
 
             sprintf(pr_t,"%.2f",vv[selec].total());
             ui->tableWidget_vente->item(0,3)->setText(pr_t);
+        }
+        else if (ui->critere_combo_box_vente->currentIndex() == 2)
+        {
+            int selec = (int)ui->doubleSpinBox_vente->value();
+
+            std::vector<vente> vv = m.ventes_par_quantite(selec);
+
+            unsigned int nombre_vente = vv.size();
+
+            ui->tableWidget_vente->setRowCount(nombre_vente);
+
+            QTableWidgetItem * tab[nombre_vente][4];
+            char id[nombre_vente][10];
+            char dat[nombre_vente][11];
+            char qte[nombre_vente][5];
+            char pr_t[nombre_vente][8];
+
+            for (int i = 0 ; i<nombre_vente ; i++)
+            {
+                for (int j = 0 ; j<4 ; j++)
+                {
+                    tab[i][j] = new QTableWidgetItem;
+                    ui->tableWidget_vente->setItem(i,j,tab[i][j]);
+                }
+
+
+                std::cout << vv[i] << std::endl;
+                sprintf(id[i],"%u",vv[i].id());
+                ui->tableWidget_vente->item(i,0)->setText(id[i]);
+
+                sprintf(dat[i],"%d/%d/%d",vv[i].date_vente().jour(),vv[i].date_vente().mois(),vv[i].date_vente().annee());
+                ui->tableWidget_vente->item(i,1)->setText(dat[i]);
+
+                sprintf(qte[i],"%u",vv[i].quantite_articles_vendus());
+                ui->tableWidget_vente->item(i,2)->setText(qte[i]);
+
+                sprintf(pr_t[i],"%.2f",vv[i].total());
+                ui->tableWidget_vente->item(i,3)->setText(pr_t[i]);
+            }
+        }
+        else if (ui->critere_combo_box_vente->currentIndex() == 3)
+        {
+            double selec1 = ui->doubleSpinBox_vente->value();
+            double selec2 = ui->doubleSpinBox_prix_max_vente->value();
+
+            std::vector<vente> vv = m.ventes_par_prix_total(selec1,selec2);
+
+            unsigned int nombre_vente = vv.size();
+
+            ui->tableWidget_vente->setRowCount(nombre_vente);
+
+            QTableWidgetItem * tab[nombre_vente][4];
+            char id[nombre_vente][10];
+            char dat[nombre_vente][11];
+            char qte[nombre_vente][5];
+            char pr_t[nombre_vente][8];
+
+            for (int i = 0 ; i<nombre_vente ; i++)
+            {
+                for (int j = 0 ; j<4 ; j++)
+                {
+                    tab[i][j] = new QTableWidgetItem;
+                    ui->tableWidget_vente->setItem(i,j,tab[i][j]);
+                }
+
+
+                std::cout << vv[i] << std::endl;
+                sprintf(id[i],"%u",vv[i].id());
+                ui->tableWidget_vente->item(i,0)->setText(id[i]);
+
+                sprintf(dat[i],"%d/%d/%d",vv[i].date_vente().jour(),vv[i].date_vente().mois(),vv[i].date_vente().annee());
+                ui->tableWidget_vente->item(i,1)->setText(dat[i]);
+
+                sprintf(qte[i],"%u",vv[i].quantite_articles_vendus());
+                ui->tableWidget_vente->item(i,2)->setText(qte[i]);
+
+                sprintf(pr_t[i],"%.2f",vv[i].total());
+                ui->tableWidget_vente->item(i,3)->setText(pr_t[i]);
+            }
         }
     }
     else
@@ -678,7 +767,11 @@ void MainWindow::ouvre_detail()
 
 void MainWindow::modif_article()
 {
-    id_vente = ui->tableau_recherche_gestion->item(ui->tableau_recherche_gestion->currentRow(),0)->text().toInt()*10000 + couleur_to_int(ui->tableau_recherche_gestion->item(ui->tableau_recherche_gestion->currentRow(),1)->text())*100 + ui->tableau_recherche_gestion->item(ui->tableau_recherche_gestion->currentRow(),2)->text().toInt();
+    unsigned int modele = ui->tableau_recherche_gestion->item(ui->tableau_recherche_gestion->currentRow(),0)->text().toInt();
+    unsigned int couleur = couleur_to_int(ui->tableau_recherche_gestion->item(ui->tableau_recherche_gestion->currentRow(),1)->text().toStdString().c_str());
+    unsigned int taille = ui->tableau_recherche_gestion->item(ui->tableau_recherche_gestion->currentRow(),2)->text().toInt();
+    reference_article rfa (modele,couleur,taille);
+    id_vente = rfa.vers_entier();
     ModifArticleDialog mad(this);
     mad.exec();
 
