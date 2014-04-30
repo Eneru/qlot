@@ -41,7 +41,7 @@ bool es::sauvegarder_magasin (std::string chemin, const magasin & m)
 
 bool es::sauvegarder_magasin (const char * chemin, const magasin & m)
 {
-    std::ofstream fichier (chemin, std::ofstream::out | std::ofstream::app);
+    std::ofstream fichier (chemin, std::ofstream::out);
     es::sauvegarder_magasin (fichier, m);
     fichier.close ();
 
